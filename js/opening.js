@@ -207,8 +207,8 @@ function openOta() {
   rankOpen = true; rankTab = 'ota';
   el.menu.classList.remove('show'); el.toast.textContent = '';
   const O = globalThis.Otakara;
-  el.rank.innerHTML = `<div class="t mm w"><span>おたから</span><small class="mm m">${O.count()} / ${O.list.length}</small></div><div class="list ota">`
-    + O.list.map(u => {
+  el.rank.innerHTML = `<div class="t mm w"><span>おたから</span><small class="mm m">${O.count()} / ${O.shown().length}</small></div><div class="list ota">`
+    + O.shown().map(u => {   // シークレットおたから（hidden）は手に入れるまで出さない
       const has = O.has(u.id);
       return `<div class="row${has ? '' : ' none'}"><span class="face" data-ico="${esc(u.id)}" data-shadow="${has ? '' : '1'}"></span>`
         + `<span class="who"><span class="nm mm">${has ? esc(u.name) : '？？？'}</span><span class="tx mm l">${has ? esc(u.text) : esc(O.need(u))}</span></span>`
@@ -447,7 +447,9 @@ function onWinClick(ev) {
     const s = new Set(look.ota || []), O = globalThis.Otakara, u = O.list.find(x => x.id === d.ota);
     if (s.has(d.ota)) s.delete(d.ota);
     else { if (u?.group) for (const x of O.list) if (x.group === u.group) s.delete(x.id); s.add(d.ota); }
-    changeLook({ ota: [...s] });
+    const patch = { ota: [...s] };
+    if (u?.group === 'かぶりもの' && s.has(d.ota)) patch.hood = false;   // かぶりもの（帽子・バンダナ）を付けたら、フードを自動で外す（フードのままだと出ないため。2026-10-10 ユーザー指定）
+    changeLook(patch);
   }
 }
 function onKey(ev) {
